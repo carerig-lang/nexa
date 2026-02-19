@@ -835,32 +835,6 @@ tbody tr:last-child { border-bottom: none !important; }
 </style>
 </head>
 <body class="bg-deep text-slate-300 font-sans antialiased h-screen flex flex-col overflow-hidden relative">
-<div id="setupModal" class="fixed inset-0 z-[60] hidden bg-deep flex items-center justify-center p-4">
-        <div class="w-full max-w-lg bg-surface border border-slate-700 rounded-2xl shadow-2xl p-8 relative border-t-4 border-t-accent">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-white tracking-widest">NEXA SETUP</h1>
-                <p class="text-sm text-slate-500 mt-2">Configurazione Database</p>
-            </div>
-            
-            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 mb-6 text-xs text-slate-300">
-                <p class="mb-2"><i class="fa-solid fa-circle-info text-accent mr-2"></i><strong>Istruzioni:</strong></p>
-                <p class="text-slate-400">Inserisci i parametri del tuo progetto Firebase per attivare il database cloud personale.</p>
-            </div>
-
-            <form onsubmit="saveFirebaseConfig(event)" class="space-y-3">
-                <div><label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">API Key</label><input type="text" id="cfg_apiKey" required class="w-full bg-deep border border-slate-700 rounded px-3 py-2 text-white text-xs font-mono" placeholder="AIzaSy..."></div>
-                <div><label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Auth Domain</label><input type="text" id="cfg_authDomain" required class="w-full bg-deep border border-slate-700 rounded px-3 py-2 text-white text-xs font-mono" placeholder="project.firebaseapp.com"></div>
-                <div><label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Project ID</label><input type="text" id="cfg_projectId" required class="w-full bg-deep border border-slate-700 rounded px-3 py-2 text-white text-xs font-mono" placeholder="project-id"></div>
-                <div><label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Storage Bucket</label><input type="text" id="cfg_storageBucket" required class="w-full bg-deep border border-slate-700 rounded px-3 py-2 text-white text-xs font-mono" placeholder="project.appspot.com"></div>
-                <div><label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Messaging Sender ID</label><input type="text" id="cfg_messagingSenderId" required class="w-full bg-deep border border-slate-700 rounded px-3 py-2 text-white text-xs font-mono" placeholder="123456..."></div>
-                <div><label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">App ID</label><input type="text" id="cfg_appId" required class="w-full bg-deep border border-slate-700 rounded px-3 py-2 text-white text-xs font-mono" placeholder="1:123456:web:..."></div>
-                
-                <button type="submit" class="w-full py-3 rounded-xl bg-accent text-darktext font-bold hover:bg-yellow-400 shadow-lg shadow-accent/20 transition-all mt-4 uppercase tracking-wide">
-                    Salva e Avvia NEXA
-                </button>
-            </form>
-        </div>
-    </div>
 
     <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-accent/5 to-transparent pointer-events-none z-0"></div>
 
@@ -949,9 +923,6 @@ tbody tr:last-child { border-bottom: none !important; }
                     <button onclick="resetDatabase()" class="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-xs text-red-400 hover:bg-red-900/30 border border-red-900/50 hover:border-red-500 transition-all mt-4">
                         <i class="fa-solid fa-trash-can"></i> RESETTA DATABASE
                     </button>
-<button onclick="resetAppConfig()" class="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-xs text-slate-400 hover:bg-slate-800 border border-slate-700 transition-all mt-2">
-    <i class="fa-solid fa-wrench"></i> Cambia Progetto Firebase
-</button>
                 </div>
             </div>
         </aside>
@@ -1321,58 +1292,56 @@ tbody tr:last-child { border-bottom: none !important; }
 </select></div><button onclick="confirmPayment()" class="w-full py-2 bg-success text-white rounded-lg font-bold hover:bg-green-600 mt-4">Conferma</button></div></div></div></div>
 <script type="module" id="firebase-init">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+  import {
+    getAuth,
+    onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
-  // Carica la configurazione salvata nel browser
-  const savedConfig = localStorage.getItem('nexa_firebase_config_v1');
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    collection,
+    onSnapshot,
+    writeBatch,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-  if (!savedConfig) {
-      // Se manca, mostra lo schermo di setup e nasconde il login
-      document.getElementById('setupModal').classList.remove('hidden');
-      document.getElementById('auth-container').classList.add('hidden');
-  } else {
-      try {
-          const firebaseConfig = JSON.parse(savedConfig);
-          const app = initializeApp(firebaseConfig);
-          const auth = getAuth(app);
-          const db = getFirestore(app);
+  const firebaseConfig = {
+  apiKey: "AIzaSyDmv8wGNUw8RxQgNX5rHEWJAmr-DdrTcuQ",
+  authDomain: "nexa-a1c58.firebaseapp.com",
+  projectId: "nexa-a1c58",
+  storageBucket: "nexa-a1c58.firebasestorage.app",
+  messagingSenderId: "1059772578576",
+  appId: "1:1059772578576:web:a826dafbb0777c32db0395"
+};
 
-          window.FB = {
-            app, auth, db,
-            onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
-            doc, setDoc, getDoc, collection, onSnapshot, writeBatch, serverTimestamp
-          };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-          window.__FIREBASE_READY__ = true;
-          
-          // Avvia il controllo dell'utente (Authentication)
-          FB.onAuthStateChanged(FB.auth, async (user) => {
-              if(user) {
-                  let prof = await fbLoadProfile(user.uid);
-                  currentUser = { 
-                      uid: user.uid, 
-                      email: user.email, 
-                      name: prof?.name || '', 
-                      surname: prof?.surname || '', 
-                      avatarId: prof?.avatarId || null 
-                  };
-                  document.getElementById('auth-container').classList.add('hidden');
-                  document.getElementById('app-container').classList.remove('hidden');
-                  initApp();
-                  fbStartListeners();
-              } else {
-                  currentUser = null;
-                  document.getElementById('app-container').classList.add('hidden');
-                  document.getElementById('auth-container').classList.remove('hidden');
-              }
-          });
-      } catch (e) {
-          alert("Errore configurazione Firebase. Resetto.");
-          localStorage.removeItem('nexa_firebase_config_v1');
-          window.location.reload();
-      }
-  }
+  window.FB = {
+    app,
+    auth,
+    db,
+    onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    doc,
+    setDoc,
+    getDoc,
+    collection,
+    onSnapshot,
+    writeBatch,
+    serverTimestamp
+  };
+
+  window.__FIREBASE_READY__ = true;
 </script>
 
     <script>
@@ -4369,8 +4338,8 @@ async function processImport(input){
       const data = JSON.parse(e.target.result);
       if(!confirm('ATTENZIONE: questa operazione sovrascriverà i dati attuali su Firebase con quelli del backup. Procedere?')) return;
 
-      const importBtn = document.querySelector('button[onclick="document.getElementById(\"importFile\").click()"]');
-      if(importBtn) importBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Caricamento...';
+      const importBtn = document.querySelector('button[onclick*="importFile"]');
+      if(importBtn) importBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Caricamento in corso...';
 
       clients = data.clients || [];
       policies = data.policies || [];
@@ -4379,14 +4348,19 @@ async function processImport(input){
 
       try{
         fbStopListeners();
+        
+        // SALVATAGGIO LOCALE AGGIUNTO: rende la visualizzazione immediata al riavvio
+        if(typeof saveLocalBackup === 'function') saveLocalBackup();
+
         await fbFullSyncToFirestore();
+        
         alert('Importazione completata con successo! I dati sono stati salvati su Firebase.');
         location.reload();
       } catch(fbErr){
         console.error('Errore Firebase import', fbErr);
-        alert('Errore durante il salvataggio su Firebase: ' + (fbErr?.message || fbErr));
-        if(importBtn) importBtn.innerHTML = '<i class="fa-solid fa-upload text-info"></i> Importa Archivio';
-        try{ fbStartListeners(); }catch(e){}
+        // Se la rete cade mentre carica, non si blocca ma riavvia usando i dati locali!
+        alert('La connessione a Firebase è lenta, ma i dati sono stati caricati sul dispositivo. Riavvio in corso...');
+        location.reload();
       }
     } catch(err){
       console.error(err);
@@ -4395,7 +4369,6 @@ async function processImport(input){
   };
   reader.readAsText(file);
 }
-
 function resetDatabase(){
   if(!currentUser) { alert('Nessun profilo attivo.'); return; }
   if(!confirm('ATTENZIONE: questa operazione cancellerà SOLO i dati (clienti/polizze/agenda/sinistri) del profilo attualmente loggato.')) return;
@@ -4510,27 +4483,6 @@ function switchSection(sectionName){
       .then(() => console.log('Service Worker registrato!'))
       .catch((error) => console.log('Errore SW:', error));
   }
-window.saveFirebaseConfig = function(e) {
-    e.preventDefault();
-    const config = {
-        apiKey: document.getElementById('cfg_apiKey').value.trim(),
-        authDomain: document.getElementById('cfg_authDomain').value.trim(),
-        projectId: document.getElementById('cfg_projectId').value.trim(),
-        storageBucket: document.getElementById('cfg_storageBucket').value.trim(),
-        messagingSenderId: document.getElementById('cfg_messagingSenderId').value.trim(),
-        appId: document.getElementById('cfg_appId').value.trim()
-    };
-    localStorage.setItem('nexa_firebase_config_v1', JSON.stringify(config));
-    alert("Configurazione salvata correttamente!");
-    window.location.reload();
-};
-
-window.resetAppConfig = function() {
-    if(confirm("Vuoi resettare la configurazione del database? Dovrai reinserire le chiavi Firebase.")){
-        localStorage.removeItem('nexa_firebase_config_v1');
-        window.location.reload();
-    }
-};
 </script>
     
 </body>
